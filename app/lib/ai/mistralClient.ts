@@ -9,15 +9,7 @@ import {
   InsuranceCoCOutput,
   InsuranceValuationReportOutput,
   OwnerListOutput,
-  InvoiceOutput,
-  InvoiceResult,
-  InsuranceQuotationOutput,
-  InsuranceQuotationResult,
 } from "@/app/lib/ai/schemas";
-import {
-  invoicePrompt,
-  insuranceQuotationPrompt,
-} from "@/app/lib/ai/mistralPrompt";
 
 const apiKey = process.env.MISTRAL_API_KEY!;
 const client = new Mistral({ apiKey });
@@ -274,7 +266,10 @@ export async function extractInsuranceValuationReportDirect(
   return resp?.choices?.[0]?.message?.parsed ?? null;
 }
 
-export async function extractOwnerListDirectmistral(buffer: Buffer, prompt: string) {
+export async function extractOwnerListDirectmistral(
+  buffer: Buffer,
+  prompt: string
+) {
   const documentUrl = await uploadPdfAndGetUrl(buffer);
   const resp = await parseWithRetry({
     model: "mistral-small-latest",
@@ -298,65 +293,9 @@ export async function extractOwnerListDirectmistral(buffer: Buffer, prompt: stri
   return resp?.choices?.[0]?.message?.parsed ?? null;
 }
 
-// ---------- Invoice ----------
-export async function extractInvoiceDirect(
+export async function extractOwnerListMarkdown(
   buffer: Buffer
-): Promise<InvoiceResult | null> {
-  const documentUrl = await uploadPdfAndGetUrl(buffer);
-  await delay(200);
-  const chatResponse = await client.chat.parse({
-    model: "mistral-small-latest",
-    messages: [
-      {
-        role: "system",
-        content:
-          "Your output must follow this schema: " + InvoiceOutput.description,
-      },
-      {
-        role: "user",
-        content: [
-          { type: "text", text: invoicePrompt },
-          { type: "document_url", documentUrl },
-        ],
-      },
-    ],
-    responseFormat: InvoiceOutput,
-    temperature: 0,
-  });
-  return chatResponse.choices?.[0]?.message?.parsed ?? null;
-}
-
-// ---------- Insurance Quotation ----------
-
-export async function extractInsuranceQuotationDirect(
-  buffer: Buffer
-): Promise<InsuranceQuotationResult | null> {
-  const documentUrl = await uploadPdfAndGetUrl(buffer);
-  await delay(200);
-  const chatResponse = await client.chat.parse({
-    model: "mistral-small-latest",
-    messages: [
-      {
-        role: "system",
-        content:
-          "Your output must follow this schema: " +
-          InsuranceQuotationOutput.description,
-      },
-      {
-        role: "user",
-        content: [
-          { type: "text", text: insuranceQuotationPrompt },
-          { type: "document_url", documentUrl },
-        ],
-      },
-    ],
-    responseFormat: InsuranceQuotationOutput,
-    temperature: 0,
-  });
-  return chatResponse.choices?.[0]?.message?.parsed ?? null;
-}
-
-export async function extractOwnerListMarkdown(buffer: Buffer): Promise<string> {
+): Promise<string> {
   const uploaded = await client.files.upload({
     file: { fileName: "ownerlist.pdf", content: buffer },
     purpose: "ocr",

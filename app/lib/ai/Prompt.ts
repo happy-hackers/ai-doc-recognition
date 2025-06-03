@@ -1,5 +1,5 @@
 export const filePrompts: Record<string, string> = {
-    planOfSubDivision: `
+  planOfSubDivision: `
   ### Objective
   Extract structured information from a "Plan of Subdivision" (POS) document and return **strictly valid JSON** containing key details about the subdivision and its lots.
   
@@ -72,8 +72,8 @@ export const filePrompts: Record<string, string> = {
       ]
     }
 `,
-  
-    letterOfAcquisition: ` 
+
+  letterOfAcquisition: ` 
   ### Objective
   Extract structured information from a "Letter of Acquisition" document and return **strictly valid JSON** containing the relevant owner (transferee) details and associated lot information.
   
@@ -190,8 +190,8 @@ export const filePrompts: Record<string, string> = {
     ]
   }
   `,
-  
-    managingAuthorityForm: `
+
+  managingAuthorityForm: `
   ### Objective
   Extract structured information from a "Managing Authority Form" document and return **strictly valid JSON** containing key details about the managing agent and associated lot information.
   
@@ -283,8 +283,8 @@ export const filePrompts: Record<string, string> = {
     ]
   }
   `,
-  
-    insuranceInvoice: `
+
+  insuranceInvoice: `
     ### Objective
     Extract structured information from an "Insurance Invoice" document and return **strictly valid JSON** containing key details about the insurance policy.
   
@@ -355,7 +355,7 @@ export const filePrompts: Record<string, string> = {
       }
     }
     `,
-    insuranceCoC: `
+  insuranceCoC: `
     ### Objective
     Extract structured information from a "Certificate of Compliance (CoC)" document and return **strictly valid JSON** containing key details about the insurance policy.
     
@@ -411,9 +411,9 @@ export const filePrompts: Record<string, string> = {
         "TotalInsurableValue": "",
       }
     }
-    `,    
-  
-    insuranceValuationReport: `### Objective
+    `,
+
+  insuranceValuationReport: `### Objective
   Extract structured information from an "Insurance Valuation Report" document and return **strictly valid JSON** containing key details about the report.
   
   ---
@@ -452,7 +452,7 @@ export const filePrompts: Record<string, string> = {
       "InspectionDate": "15/12/2024"
     }
   }`,
-  
+
   ownerlist: `
   ### Objective
   Extract structured information from an "Owner List" document presented as a table and return **strictly valid JSON** containing key details about each owner and their associated lot information.
@@ -592,10 +592,27 @@ To ensure correctness, follow these hard rules for extracting values. Violating 
 
   ### Output Requirements
   - Do not fabricate or guess any values.  
-  `
-  };
-  
-  export const integrationPromptWithLots = `
+  `,
+
+  openai_ocr_generic: `
+  You are an OCR assistant. Extract **all visible text** from the provided PDF and return them.
+  Preserve headings and tables when obvious. Put '---' between pages.
+  `.trim(),
+
+  openai_markdown_analysis: `
+You are a concise document assistant. 
+Given raw Markdown extracted from a PDF, identify the document type 
+and return a short structured summary:
+
+**Format**
+- **Type**: <detected type>
+- **Key Facts**: <bullet list>
+- **Observations**: <short paragraph>
+
+  `.trim(),
+};
+
+export const integrationPromptWithLots = `
   ### **Integration Instructions**
   You will receive multiple JSON fragments extracted from different document types. Your task is to merge these fragments into a single structured JSON object, ensuring proper **logical grouping** of data. Each field must only be populated from the correct document type as described below.
   
@@ -880,218 +897,6 @@ To ensure correctness, follow these hard rules for extracting values. Violating 
           }
         }
       }
-    ]
-  }
-  `;
-  
-  export const insuranceIntegrationPrompt = `
-  ### **Integration Instructions (Insurance Only)**
-  You will receive multiple JSON fragments extracted from different insurance-related document types. Your task is to merge these fragments into a single structured JSON object under the key "InsuranceInformation". Each field must only be populated from the correct document type as described below.
-  
-  ---
-  
-  ## **Data Source Rules**
-  1. **InsuranceInformation** (Insurance Data)
-     - **Only extracted from**: **insuranceInvoice, insuranceCoC, insuranceValuationReport**
-     - Extract only the **first identified** 'TotalInsurableValue'.
-     - Extract only the **first identified** 'InspectionDate'.
-     - Merge all other InsuranceInformation fields only from these sources.
-     - Ignore any data from other sources that may appear.
-  
-  ---
-  
-  ## **Key Normalization Rules**
-  1. **TotalInsurableValue Extraction**
-     - Extract from **insuranceInvoice** or **insuranceCoC**.
-     - Use **only the first identified** 'TotalInsurableValue' and discard all subsequent occurrences.
-  ---
-  
-  ## **Final JSON Output Format (Insurance Only)**
-  {
-    "InsuranceInformation": {
-      "PolicyNumber": "",
-      "InsuranceProvider": "",
-      "PolicyType": "",
-      "StartDate": "",
-      "EndDate": "",
-      "TotalPayable": "",
-      "TotalInsurableValue": "",
-      "Commission": ""
-    }
-  }
-  
-  Return ONLY this final merged JSON object, with no extra text.
-  `;
-  
-  export const noaIntegrationPrompt = `
-  ### **Integration Instructions (Letter Of Acquisition)**
-  You will receive multiple JSON fragments extracted from different sections of a Letter Of Acquisition document. Your task is to merge these fragments into a single structured JSON object under the key "OwnerInformation" (or an array of "OwnerInformation" objects if multiple entries exist). Each field must only be populated from the raw fragments as extracted from the document.
-  
-  ---
-  
-  ## **Data Source Rules**
-  1. **OwnerInformation** (Letter Of Acquisition Data)
-     - **Only extracted from**: **letterOfAcquisition**
-     - Extract the transferee's details (i.e. the new owner's information).
-     - In cases where multiple owners exist for the same lot, concatenate names using "&", use the first valid email as "AccountEmail" and assign additional emails to "OtherContactEmails1/2/3".
-     - Do not infer or guess values for missing fields.
-  
-  ---
-  
-  ## **Final JSON Output Format (Letter Of Acquisition Only)**
-  {
-    "OwnerInformation": {
-      "LotNumber": "",
-      "UnitNumber": "",
-      "AccountEmail": "",
-      "FullName": "",
-      "ReferenceName": "",
-      "OwnerMobileNumber": "",
-      "OwnerHomeNumber": "",
-      "OwnerBusinessNumber": "",
-      "OtherContactEmails1": "",
-      "OtherContactEmails2": "",
-      "OtherContactEmails3": "",
-      "OwnerPostalAddress": {
-        "Street": "",
-        "Level": "",
-        "City": "",
-        "State": "",
-        "PostalCode": ""
-      }
-    }
-  }
-  
-  Return ONLY this final merged JSON object, with no extra text.
-  `;
-  
-  export const agentIntegrationPrompt = `
-  ### **Integration Instructions (Managing Authority Form)**
-  You will receive multiple JSON fragments extracted from different sections of a Managing Authority Form document. Your task is to merge these fragments into a single structured JSON object under the key "AgentInformation" (or an array of "AgentInformation" objects if multiple entries exist). Each field must only be populated from the raw fragments as extracted from the document.
-  
-  ---
-  
-  ## **Data Source Rules**
-  1. **AgentInformation** (Managing Authority Data)
-     - **Only extracted from**: **managingAuthorityForm**
-     - Extract the managing agent and agency details including "UnitNumber", "AgentName", "AgentContactNumber", "AgentContactEmail", "AgencyName", "AgencyABN", and "AgencyAddress".
-     - The "UnitNumber" should be extracted only from the target property address (ignore any numbers from client or other details).
-     - Omit any field that is not present in the raw fragments.
-  
-  ---
-  
-  ## **Final JSON Output Format (Managing Authority Form Only)**
-  {
-    "AgentInformation": {
-      "UnitNumber": "",
-      "AgentName": "",
-      "AgentContactNumber": "",
-      "AgentContactEmail": "",
-      "AgencyName": "",
-      "AgencyABN": "",
-      "AgencyAddress": {
-        "Street": "",
-        "Level": "",
-        "City": "",
-        "State": "",
-        "PostalCode": ""
-      }
-    }
-  }
-  
-  Return ONLY this final merged JSON object, with no extra text.
-  `;
-  
-  
-  export const invoicePrompt = `
-  You are a professional invoice data extraction AI. Please extract the following fields from the invoice and return a strictly valid JSON object. Do not include any extra text.
-  
-  Important Notes:
-  1. "creditor" must be the entity receiving payment (the payee or billing party), not the payer.
-  
-  2. "invoiceDate" is the issue date printed on the invoice (do not confuse it with due date or payment terms).
-     - Format: Always return as "dd/mm/yyyy".
-     - Example formats you may encounter and how to convert:
-       - "2024-09-18" → "18/09/2024"
-       - "18 Sep 2024" → "18/09/2024"
-       - "20 Apr 2023" → "20/04/2023"
-  
-  3. "dueDate" is the invoice's due date.
-     - Same formatting: "dd/mm/yyyy".
-     - Example:
-       - "2024/09/30" → "30/09/2024"
-       - "30 Sept 2024" → "30/09/2024"
-  
-  4. "reference" refers to the bank transfer reference number.
-     - If no clear bank transfer reference exists, or if the only candidate appears to be an address (e.g., street information), leave this field empty.
-  
-  5. "psNumber" refers to property identification numbers:
-     - Capture any code that starts with "PS", "OC", "SP", "PR", followed by alphanumeric characters (e.g., PS841794R, SP723193E, OC849299J).
-     - If both "PS" and "OC" numbers are present, prioritize "PS".
-     - If only "OC" exists, use "OC" as psNumber.
-  
-  6. "address" must be extracted **exclusively** from the text immediately following the keywords "Bill To" or "Description", as these indicate the creditor's address.
-     - Do not extract addresses from any other part of the invoice.
-     - Only extract the primary address block; if the text contains delimiters like "c/o", "Attn", etc., include only the part before these markers.
-  
-  7. "bsb" should be exactly 6 digits, including leading zeros.
-  
-  8. If "gst" is not available or only contains non-meaningful symbols like "-", return it as an empty string.
-  
-  9. "description" refers to the purpose of the invoice, found in the "Description" section of the invoice.
-     - Extract the main purpose or service description of the invoice, e.g., "Regular mowing and gardening 22/09/2024", or "Lawn mowing and gardening services".
-     - Do **not** include unrelated information such as addresses, payment amounts, or totals.
-     - Focus only on the service or product description.
-     - If the description is not clearly defined, leave this field empty.
-  
-  Extract and return only the following fields:
-  - invoiceNumber
-  - creditor
-  - amount
-  - gst
-  - invoiceDate
-  - dueDate
-  - reference
-  - psNumber
-  - address
-  - accountName
-  - bsb
-  - accountNumber
-  - paymentReference
-  - bpayBillerCode
-  - bpayReferenceNumber
-  - description
-  - abn
-  `;
-  
-  
-  export const insuranceQuotationPrompt = `
-  You are a professional insurance quotation data extraction AI. Please extract from the document the insurance provider(s) and their corresponding premium amounts, and return a JSON object with a property "results" that is an array. Each item in the array should be an object containing the following keys:
-  - insuranceProvider: the name of the insurer.
-  - premium: the premium amount, or "declined" if no premium is provided.
-  
-  Notes:
-  1. "insuranceProvider" refers to the insurer's name and should be extracted even if no premium amount is provided.
-    - If the document shows both the broker and an “On behalf of the Insurers” line (e.g.  
-     “Strata Unit Underwriting Agency Pty Ltd  
-      On behalf of the Insurers: Insurance Australia Limited t/as CGU Insurance Limited”),  
-     then **only** extract the first line (“Strata Unit Underwriting Agency Pty Ltd”) as the **insuranceProvider**.  
-    - Do **not** include any text starting with “On behalf of the Insurers” or similar qualifiers.
-
-  2. "premium" refers to the total premium amount. Look for text cues such as "Total Payable including all Fees and Charges", "Total Amount Payable by Insured", "Total Premium Payable", or similar descriptions. If no clear premium amount is present for an insurer, set its value to "declined".
-    - **Do not** extract amounts from a “GST included in above premium” line.
-
-  3. There may be multiple insurers in the document; for each insurer found, extract its corresponding premium amount (or "declined" if missing).
-  4. Only extract values that are clearly related to the premium amounts.
-  
-  Return the result as a JSON object in the following format:
-  {
-    "results": [
-      {
-        "insuranceProvider": "Example Insurer",
-        "premium": "100.00" // or "declined" if not provided
-      },
-      ...
     ]
   }
   `;

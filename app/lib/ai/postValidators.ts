@@ -5,7 +5,6 @@ import {
   extractOwnerListDirectmistral,
 } from "@/app/lib/ai/mistralClient";
 import {
-  parseOwnerListFromMarkdown,
   extractOwnerListDirectopenai,
   llmParseOwnerBlock,
 } from "@/app/lib/ai/openAiFileClient";
@@ -277,24 +276,6 @@ export function markdownToRows(md: string): RawRow[] {
   );
   return rows;
 }
-
-// RawRow[] ➜ OwnerBlock[]
-// export function groupRows(rows: RawRow[]): OwnerBlock[] {
-//   const blocks: OwnerBlock[] = [];
-//   for (let i = 0; i < rows.length; i += 2) {
-//     if (!rows[i + 1]) {
-//       console.warn(`[GroupRows] odd tail row skipped @index ${i}`); // DEBUG
-//       break;
-//     }
-//     if (rows[i].lotOrCrn.toUpperCase() === "CRN") {
-//       console.warn(`[GroupRows] mis-aligned CRN row at ${i}, skipping`); // DEBUG
-//       continue;
-//     }
-//     blocks.push({ first: rows[i], second: rows[i + 1] });
-//   }
-//   console.log(`[GroupRows] total owner blocks:`, blocks.length); // DEBUG
-//   return blocks;
-// }
 
 export function groupRows(rows: RawRow[]): OwnerBlock[] {
   const blocks: OwnerBlock[] = [];

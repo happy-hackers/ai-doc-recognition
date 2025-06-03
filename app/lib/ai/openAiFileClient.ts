@@ -18,6 +18,7 @@ import {
   InvoiceResult,
   InsuranceQuotationOutput,
   InsuranceQuotationResult,
+  MarkdownAnalysisOutput,
 } from "@/app/lib/ai/schemas";
 
 export async function uploadPdfAndGetFileId(
@@ -327,3 +328,46 @@ Task:
 
   return completion.choices[0].message.parsed?.Lots?.[0] ?? null;
 }
+
+export async function ocrPdfBufferOpenai(
+    buffer: Buffer,
+    prompt: string
+  ): Promise<string> {
+    const fileId = await uploadPdfAndGetFileId(buffer, "ocr-document.pdf");
+  
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      temperature: 0,
+      messages: [
+        { role: "system", content: prompt },
+        {
+          role: "user",
+          content: [
+            { type: "file", file: { file_id: fileId } },
+            {
+              type: "text",
+              text: "Extract all visible text from this PDF, preserving basic layout.",
+            },
+          ],
+        },
+      ],
+    });
+  
+    return completion.choices[0]?.message?.content ?? "";
+  }
+
+  export async function analyzeMarkdownWithOpenAI(
+    markdown: string,
+    prompt: string
+  ): Promise<string> {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      temperature: 0,
+      response_format: zodResponseFormat(MarkdownAnalysisOutput, "analysis"),
+      messages: [
+        { role: "system", content: prompt },
+        { role: "user", content: markdown},
+      ],
+    });
+    return completion.choices[0]?.message?.content ?? "";
+  }

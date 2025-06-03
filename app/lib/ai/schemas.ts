@@ -1,29 +1,27 @@
-// schemas.ts
 import { z } from "zod";
 
 /* ---------- shared address ---------- */
 export const OwnerPostalAddress = z
   .object({
-    Level: z.string(),
-    Street: z.string(),
-    City: z.string(),
-    State: z.string(),
-    PostalCode: z.string(),
+    Level: z.string().or(z.null()).optional(),
+    Street: z.string().or(z.null()).optional(),
+    City: z.string().or(z.null()).optional(),
+    State: z.string().or(z.null()).optional(),
+    PostalCode: z.string().or(z.null()).optional(),
   })
-  .partial();
+  .or(z.null())
+  .optional();
 
 /* ---------- Letter of Acquisition ---------- */
 export const OwnerInformation = z.object({
-  LotNumber: z.string().optional(),
-  UnitNumber: z.string().optional(),
-  AccountEmail: z.string().optional(),
+  LotNumber: z.string().or(z.null()).optional(),
+  UnitNumber: z.string().or(z.null()).optional(),
+  AccountEmail: z.string().or(z.null()).optional(),
   FullName: z.string(),
-  OwnerMobileNumber: z.string().optional(),
-  // OwnerHomeNumber: z.string().optional(),
-  // OwnerBusinessNumber: z.string().optional(),
-  OtherContactEmails1: z.string().optional(),
-  OtherContactEmails2: z.string().optional(),
-  OtherContactEmails3: z.string().optional(),
+  OwnerMobileNumber: z.string().or(z.null()).optional(),
+  OtherContactEmails1: z.string().or(z.null()).optional(),
+  OtherContactEmails2: z.string().or(z.null()).optional(),
+  OtherContactEmails3: z.string().or(z.null()).optional(),
   OwnerPostalAddress,
 });
 
@@ -50,11 +48,8 @@ export const OCAddress = z.object({
 
 export const PlanOfSubdivisionOutput = z.object({
   OCInformation: z.object({
-    // BuildingNumber: z.string(),
-    // BodyCorporateName: z.string(),
     PSNumber: z.string(),
     Address: OCAddress,
-    // EndOfFinancialYear: z.string(),
     NumberOfLots: z.string(),
     TotalLiability: z.string(),
   }),
@@ -67,20 +62,21 @@ export const ManagingAuthorityFormOutput = z.object({
   Lots: z.array(
     z.object({
       AgentInformation: z.object({
-        UnitNumber: z.string().optional(),
+        UnitNumber: z.string().or(z.null()).optional(),
         AgentName: z.string(),
-        AgentContactNumber: z.string().optional(),
-        AgentContactEmail: z.string().optional(),
-        AgencyName: z.string().optional(),
-        AgencyABN: z.string().optional(),
+        AgentContactNumber: z.string().or(z.null()).optional(),
+        AgentContactEmail: z.string().or(z.null()).optional(),
+        AgencyName: z.string().or(z.null()).optional(),
+        AgencyABN: z.string().or(z.null()).optional(),
         AgencyAddress: z
           .object({
-            Street: z.string().optional(),
-            Level: z.string().optional(),
-            City: z.string().optional(),
-            State: z.string().optional(),
-            PostalCode: z.string().optional(),
+            Street: z.string().or(z.null()).optional(),
+            Level: z.string().or(z.null()).optional(),
+            City: z.string().or(z.null()).optional(),
+            State: z.string().or(z.null()).optional(),
+            PostalCode: z.string().or(z.null()).optional(),
           })
+          .or(z.null())
           .optional(),
       }),
     })
@@ -94,13 +90,13 @@ export type ManagingAuthorityFormResult = z.infer<
 export const InsuranceInvoiceOutput = z.object({
   InsuranceInformation: z.object({
     PolicyNumber: z.string(),
-    InsuranceProvider: z.string().optional(),
-    PolicyType: z.string().optional(),
-    StartDate: z.string().optional(),
-    EndDate: z.string().optional(),
-    TotalPayable: z.string().optional(),
-    TotalInsurableValue: z.string().optional(),
-    Commission: z.string().optional(),
+    InsuranceProvider: z.string().or(z.null()).optional(),
+    PolicyType: z.string().or(z.null()).optional(),
+    StartDate: z.string().or(z.null()).optional(),
+    EndDate: z.string().or(z.null()).optional(),
+    TotalPayable: z.string().or(z.null()).optional(),
+    TotalInsurableValue: z.string().or(z.null()).optional(),
+    Commission: z.string().or(z.null()).optional(),
   }),
 });
 export type InsuranceInvoiceResult = z.infer<typeof InsuranceInvoiceOutput>;
@@ -110,11 +106,11 @@ export const InsuranceCoCOutput = z
   .object({
     InsuranceInformation: z.object({
       PolicyNumber: z.string(),
-      InsuranceProvider: z.string().optional(),
-      PolicyType: z.string().optional(),
-      StartDate: z.string().optional(),
-      EndDate: z.string().optional(),
-      TotalInsurableValue: z.string().optional(),
+      InsuranceProvider: z.string().or(z.null()).optional(),
+      PolicyType: z.string().or(z.null()).optional(),
+      StartDate: z.string().or(z.null()).optional(),
+      EndDate: z.string().or(z.null()).optional(),
+      TotalInsurableValue: z.string().or(z.null()).optional(),
     }),
   })
   .describe(
@@ -139,26 +135,24 @@ export const OwnerListOutput = z
     Lots: z.array(
       z.object({
         OwnerInformation: z.object({
-          PSNumber: z.string().optional(),
-          LotNumber: z.string().optional(),
-          UnitNumber: z.string().optional(),
-          AccountEmail: z.string().optional(),
-          OtherContactEmails1: z.string().optional(),
-          OtherContactEmails2: z.string().optional(),
-          OtherContactEmails3: z.string().optional(),
+          PSNumber: z.string().or(z.null()).optional(),
+          LotNumber: z.string().or(z.null()).optional(),
+          UnitNumber: z.string().or(z.null()).optional(),
+          AccountEmail: z.string().or(z.null()).optional(),
+          OtherContactEmails1: z.string().or(z.null()).optional(),
+          OtherContactEmails2: z.string().or(z.null()).optional(),
+          OtherContactEmails3: z.string().or(z.null()).optional(),
           FullName: z.string(),
-          OwnerMobileNumber: z.string().optional(),
-          OwnerPostalAddress: z
-            .object({
-              Street: z.string().optional(),
-              Level: z.string().optional(),
-              City: z.string().optional(),
-              State: z.string().optional(),
-              PostalCode: z.string().optional(),
-            })
+          OwnerMobileNumber: z.string().or(z.null()).optional(),
+          OwnerPostalAddress,
+          "Levy Delivery Method": z
+            .enum(["Email", "Print"])
+            .or(z.null())
             .optional(),
-          "Levy Delivery Method": z.enum(["Email", "Print"]).optional(),
-          "Correspondence Method": z.enum(["Email", "Print"]).optional(),
+          "Correspondence Method": z
+            .enum(["Email", "Print"])
+            .or(z.null())
+            .optional(),
         }),
       })
     ),
@@ -204,3 +198,12 @@ export const InsuranceQuotationOutput = z
   })
   .describe("Insurance Quotation schema");
 export type InsuranceQuotationResult = z.infer<typeof InsuranceQuotationOutput>;
+
+/* ---------- Markdown Analysis (Mistral ➜ OpenAI) ---------- */
+export const MarkdownAnalysisOutput = z.object({
+  Type: z.string(),
+  KeyFacts: z.array(z.string()),
+  Observations: z.string(),
+});
+
+export type MarkdownAnalysisResult = z.infer<typeof MarkdownAnalysisOutput>;

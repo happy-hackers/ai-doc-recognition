@@ -1,23 +1,48 @@
-'use client';
+"use client";
 
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
-
-
-const DocumentUpload = dynamic(
-  () => import("@/app/components/DocumentUpload"),
-  { ssr: false }
-);
+import Link from "next/link";
+import { Typography, Card, Button, Space } from "antd";
+import { RobotOutlined, ThunderboltOutlined } from "@ant-design/icons";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-start p-8">
-      <h1 className="mb-6 text-3xl font-semibold">AI Document Extractor</h1>
-
-      {/* Suspense 可选，用于加载指示 */}
-      <Suspense fallback={<p>Loading component…</p>}>
-        <DocumentUpload />
-      </Suspense>
-    </main>
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+      }}
+    >
+      <Card
+        hoverable
+        style={{ maxWidth: 360, width: "100%", textAlign: "center" }}
+      >
+        <Typography.Title level={3}>AI Document Extractor</Typography.Title>
+        <Space direction="vertical" size="large" style={{ width: "100%" }}>
+          <Link href="/strata" passHref>
+            <Button type="primary" block>
+              Strata Document Analysis
+            </Button>
+          </Link>
+          <Link href="/openai" passHref>
+            <Button type="default" icon={<RobotOutlined />} block>
+              OpenAI Analysis
+            </Button>
+          </Link>
+          <Link href="/mistral" passHref>
+            <Button type="default" icon={<RobotOutlined />} block>
+              Mistral Analysis
+            </Button>
+          </Link>
+          <Link href="/combo" passHref>
+            <Button type="default" icon={<ThunderboltOutlined />} block>
+              Mistral + OpenAI Analysis
+            </Button>
+          </Link>
+        </Space>
+      </Card>
+    </div>
   );
 }
